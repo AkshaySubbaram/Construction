@@ -1,0 +1,134 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Commercial</span>
+      <h2>Contracts</h2>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert error">{{ errorMessage() }}</div>
+  }
+
+  <div class="layout-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h3>{{ form.value.id ? 'Edit contract' : 'Add contract' }}</h3>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="contract-form">
+        <div class="field-grid">
+          <label>
+            <span>Agency</span>
+            <select formControlName="agency_id">
+              <option value="">Select an agency</option>
+              @for (agency of agencies(); track agency.id) {
+                <option [value]="agency.id">{{ agency.name }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Contract number</span>
+            <input formControlName="contract_number" type="text" placeholder="CC-2026-001" />
+          </label>
+
+          <label>
+            <span>Contract title</span>
+            <input formControlName="title" type="text" placeholder="Structural work package" />
+          </label>
+
+          <label>
+            <span>Status</span>
+            <select formControlName="status">
+              @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Contract amount</span>
+            <input formControlName="amount" type="number" min="0" step="1000" />
+          </label>
+
+          <label>
+            <span>Advance amount</span>
+            <input formControlName="advance_amount" type="number" min="0" step="1000" />
+          </label>
+
+          <label>
+            <span>Retention amount</span>
+            <input formControlName="retention_amount" type="number" min="0" step="1000" />
+          </label>
+
+          <label>
+            <span>Agreed start date</span>
+            <input formControlName="agreed_start_date" type="date" />
+          </label>
+
+          <label>
+            <span>Expected completion</span>
+            <input formControlName="expected_completion_date" type="date" />
+          </label>
+
+          <label class="full-width">
+            <span>Description</span>
+            <textarea formControlName="description" rows="3" placeholder="Service summary"></textarea>
+          </label>
+
+          <label class="full-width">
+            <span>Scope of work</span>
+            <textarea formControlName="scope_of_work" rows="3" placeholder="Detailed scope and deliverables"></textarea>
+          </label>
+
+          <label class="full-width">
+            <span>Terms and conditions</span>
+            <textarea formControlName="terms_and_conditions" rows="3" placeholder="Payment terms and operational conditions"></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" type="submit" [disabled]="loading()">
+            {{ loading() ? 'Saving...' : form.value.id ? 'Update contract' : 'Save contract' }}
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h3>Contract ledger</h3>
+      </div>
+
+      @if (loading()) {
+        <div class="empty-state">Loading contracts...</div>
+      } @else if (contracts().length === 0) {
+        <div class="empty-state">No contracts created yet.</div>
+      } @else {
+        <div class="contract-list">
+          @for (contract of contracts(); track contract.id) {
+            <div class="contract-item">
+              <div class="contract-head">
+                <div>
+                  <strong>{{ contract.title }}</strong>
+                  <small>{{ contract.contract_number }}</small>
+                </div>
+                <span class="status-pill status-{{ contract.status }}">{{ contract.status }}</span>
+              </div>
+
+              <div class="contract-body">
+                <span>{{ contract.agency_name }}</span>
+                <span>₹{{ contract.amount | number:'1.0-0' }}</span>
+              </div>
+
+              <div class="contract-actions">
+                <button type="button" class="link-button" (click)="editContract(contract)">Edit</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </article>
+  </div>
+</section>

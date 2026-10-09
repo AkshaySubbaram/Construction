@@ -1,0 +1,23 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Evidence</span>
+      <h2>Documents and photos</h2>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Uploaded record set</h3>
+    </div>
+
+    <div class="document-grid">
+      <article *ngFor="let item of documents()" class="document-card">
+        <div class="doc-type">{{ item.type }}</div>
+        <strong>{{ item.name }}</strong>
+        <small>{{ item.date }}</small>
+        <span>{{ item.related }}</span>
+      </article>
+    </div>
+  </div>
+</section>

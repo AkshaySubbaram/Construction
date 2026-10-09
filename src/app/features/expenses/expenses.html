@@ -1,0 +1,132 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Cost tracking</span>
+      <h2>Expenses</h2>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card accent-blue">
+      <span>Total spent</span>
+      <strong>₹{{ totalSpent() | number:'1.0-0' }}</strong>
+    </article>
+    <article class="summary-card accent-green">
+      <span>Approved</span>
+      <strong>₹{{ totalApproved() | number:'1.0-0' }}</strong>
+    </article>
+  </div>
+
+  <div class="layout-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <h3>{{ editingId() ? 'Edit expense' : 'Add expense' }}</h3>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submitExpense()" class="expense-form">
+        <div class="field-grid">
+          <label>
+            Agency
+            <select formControlName="agency_id">
+              <option value="">General expense</option>
+              <option *ngFor="let agency of agencies()" [value]="agency.id">{{ agency.name }}</option>
+            </select>
+          </label>
+
+          <label>
+            Category
+            <select formControlName="category">
+              <option value="labour">Labour</option>
+              <option value="materials">Materials</option>
+              <option value="equipment">Equipment</option>
+              <option value="permit">Permit</option>
+              <option value="misc">Misc.</option>
+            </select>
+          </label>
+
+          <label class="full-width">
+            Description
+            <input type="text" formControlName="description" placeholder="Cement and aggregate supply" />
+          </label>
+
+          <label>
+            Vendor
+            <input type="text" formControlName="vendor" placeholder="Supplying agency or vendor" />
+          </label>
+
+          <label>
+            Amount (₹)
+            <input type="number" min="1" formControlName="amount" />
+          </label>
+
+          <label>
+            Date
+            <input type="date" formControlName="incurred_date" />
+          </label>
+
+          <label>
+            Status
+            <select formControlName="status">
+              <option value="planned">Planned</option>
+              <option value="approved">Approved</option>
+              <option value="paid">Paid</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </label>
+
+          <label>
+            Receipt ref.
+            <input type="text" formControlName="receipt_ref" placeholder="INV-9921" />
+          </label>
+
+          <label class="full-width">
+            Notes
+            <textarea rows="3" formControlName="notes" placeholder="Material receipt, payment note, or reason"></textarea>
+          </label>
+        </div>
+
+        <div *ngIf="formError()" class="alert error">{{ formError() }}</div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">{{ editingId() ? 'Save expense' : 'Add expense' }}</button>
+          <button type="button" class="link-button" (click)="resetForm()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Expense history</h3>
+      </div>
+
+      <div class="expense-list">
+        <div *ngIf="!expenses().length" class="empty-state">No expenses recorded.</div>
+
+        <article *ngFor="let expense of expenses()" class="expense-item">
+          <div class="expense-head">
+            <div>
+              <strong>{{ expense.description }}</strong>
+              <small>{{ expense.incurred_date }}</small>
+            </div>
+            <span class="status-pill status-{{ expense.status }}">{{ expense.status }}</span>
+          </div>
+
+          <div class="expense-body">
+            <span>₹{{ expense.amount | number:'1.0-0' }}</span>
+            <span>{{ expense.category }}</span>
+          </div>
+
+          <div class="expense-meta" *ngIf="expense.vendor || expense.receipt_ref">
+            <span *ngIf="expense.vendor">{{ expense.vendor }}</span>
+            <span *ngIf="expense.receipt_ref">{{ expense.receipt_ref }}</span>
+          </div>
+
+          <div class="expense-actions">
+            <button type="button" class="link-button" (click)="editExpense(expense)">Edit</button>
+            <button type="button" class="link-button danger" (click)="deleteExpense(expense.id)">Delete</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

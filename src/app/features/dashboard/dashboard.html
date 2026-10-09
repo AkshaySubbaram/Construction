@@ -1,0 +1,59 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Overview</span>
+      <h2>Project dashboard</h2>
+    </div>
+    <button class="primary-button" type="button">Generate report</button>
+  </div>
+
+  <div class="stats-grid">
+    @for (card of cards(); track card.label) {
+      <article class="stat-card {{ card.tone }}">
+        <span>{{ card.label }}</span>
+        <strong>{{ card.value }}</strong>
+      </article>
+    }
+  </div>
+
+  <div class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h3>Agency health</h3>
+      </div>
+
+      <div class="progress-list">
+        @for (agency of agencies(); track agency.id) {
+          <div class="progress-row">
+            <div class="meta">
+              <span class="name">{{ agency.name }}</span>
+              <span class="sub">{{ agency.work_category }}</span>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar" [style.width.%]="agency.status === 'active' ? 78 : agency.status === 'planned' ? 46 : agency.status === 'completed' ? 100 : 18"></div>
+            </div>
+            <span class="status-pill status-{{ agency.status }}">{{ agency.status }}</span>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h3>Recent agencies</h3>
+      </div>
+
+      <ul class="list-view">
+        @for (agency of agencies().slice(0, 4); track agency.id) {
+          <li>
+            <div>
+              <strong>{{ agency.name }}</strong>
+              <small>{{ agency.contact_person }}</small>
+            </div>
+            <span>{{ agency.status }}</span>
+          </li>
+        }
+      </ul>
+    </article>
+  </div>
+</section>

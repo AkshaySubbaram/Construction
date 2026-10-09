@@ -1,0 +1,118 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Site updates</span>
+      <h2>Daily progress</h2>
+    </div>
+    <div class="stat-chip">
+      <span>Avg. completion</span>
+      <strong>{{ averageProgress() }}%</strong>
+    </div>
+  </div>
+
+  <div class="layout-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <h3>{{ editingId() ? 'Edit progress log' : 'Log site progress' }}</h3>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submitEntry()" class="progress-form">
+        <div class="field-grid">
+          <label>
+            Date
+            <input type="date" formControlName="date" />
+          </label>
+
+          <label>
+            Location
+            <input type="text" formControlName="location" placeholder="First floor, west wall" />
+          </label>
+
+          <label>
+            Status
+            <select formControlName="status">
+              <option value="planned">Planned</option>
+              <option value="in_progress">In progress</option>
+              <option value="completed">Completed</option>
+              <option value="issue">Issue</option>
+            </select>
+          </label>
+
+          <label>
+            Progress (%)
+            <input type="number" min="0" max="100" formControlName="progress_percent" />
+          </label>
+
+          <label>
+            Labour count
+            <input type="number" min="0" formControlName="manpower" />
+          </label>
+
+          <label>
+            Weather
+            <input type="text" formControlName="weather" placeholder="Sunny / Rain / Cloudy" />
+          </label>
+
+          <label class="full-width">
+            Summary
+            <textarea rows="3" formControlName="summary" placeholder="Describe what work happened today"></textarea>
+          </label>
+
+          <label class="full-width">
+            Notes
+            <textarea rows="3" formControlName="notes" placeholder="Quality checks, material issue, or pending action"></textarea>
+          </label>
+
+          <label class="full-width">
+            Evidence files
+            <input type="text" formControlName="attachments" placeholder="site1.jpg, report.pdf" />
+          </label>
+        </div>
+
+        <div *ngIf="formError()" class="alert error">{{ formError() }}</div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">{{ editingId() ? 'Save progress' : 'Add entry' }}</button>
+          <button type="button" class="link-button" (click)="resetForm()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Recent updates</h3>
+      </div>
+
+      <div class="entry-list">
+        <div *ngIf="!entries().length" class="empty-state">No site logs recorded yet.</div>
+
+        <article *ngFor="let entry of entries()" class="entry-item">
+          <div class="entry-head">
+            <div>
+              <strong>{{ entry.location }}</strong>
+              <small>{{ entry.date }}</small>
+            </div>
+            <span class="status-pill status-{{ entry.status }}">{{ entry.status }}</span>
+          </div>
+
+          <p>{{ entry.summary }}</p>
+
+          <div class="entry-meta">
+            <span>{{ entry.progress_percent }}% complete</span>
+            <span>{{ entry.manpower }} staff</span>
+            <span *ngIf="entry.weather">{{ entry.weather }}</span>
+          </div>
+
+          <div class="entry-attachments" *ngIf="entry.attachments?.length">
+            <span *ngFor="let attachment of entry.attachments">{{ attachment }}</span>
+          </div>
+
+          <div class="entry-actions">
+            <button type="button" class="link-button" (click)="editEntry(entry)">Edit</button>
+            <button type="button" class="link-button danger" (click)="deleteEntry(entry.id)">Delete</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

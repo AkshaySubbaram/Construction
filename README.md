@@ -1,59 +1,63 @@
-# Construction
+# House Construction Management Web App
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.26.
+A production-minded Angular application for tracking a residential construction project from contract award to completion.
 
-## Development server
+## What it covers
 
-To start a local development server, run:
+- Agency management for contractors and vendors
+- Contract and milestone tracking
+- Payment ledger and commitment tracking
+- Daily site progress logging with evidence notes
+- Expense recording by category and status
+- Document/photo evidence list
+- Project report summary for cost and progress visibility
+- Protected app shell with sign-in flow and dashboard navigation
 
-```bash
-ng serve
-```
+## Tech stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Angular 21
+- TypeScript
+- Standalone Angular components
+- Signals for local state handling
+- Supabase-ready service layer for future persistence
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Run locally
 
 ```bash
-ng build
+npm install
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Then open:
 
-## Running unit tests
+http://localhost:4200/
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Production architecture
+
+This project is designed to stay low-cost:
+
+- Frontend: Angular app hosted on Vercel
+- Backend/data layer: Supabase Auth + PostgreSQL + Storage
+- Domain: your own custom domain or subdomain
+- Estimated recurring cost: ₹0 beyond your domain and hosting subscriptions you already own
+
+## Recommended deployment plan
+
+1. Create a Supabase project
+2. Add your auth URL and anon key to environment configuration
+3. Create tables for agencies, contracts, milestones, payments, progress, expenses
+4. Add row-level security rules for project owner access
+5. Deploy the frontend to Vercel and connect your domain
+6. Configure environment variables in Vercel
+
+## Demo credential
+
+This app includes a local demo login flow for initial development and testing.
+
+## Build validation
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The current build passes successfully in the project.

@@ -1,0 +1,139 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Execution</span>
+      <h2>Milestones</h2>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert error">{{ errorMessage() }}</div>
+  }
+
+  <div class="layout-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h3>{{ form.value.id ? 'Edit milestone' : 'Add milestone' }}</h3>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="milestone-form">
+        <div class="field-grid">
+          <label>
+            <span>Agency</span>
+            <select formControlName="agency_id">
+              <option value="">Select agency</option>
+              @for (agency of agencies(); track agency.id) {
+                <option [value]="agency.id">{{ agency.name }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Contract</span>
+            <select formControlName="contract_id">
+              <option value="">Select contract</option>
+              @for (contract of contracts(); track contract.id) {
+                <option [value]="contract.id">{{ contract.title }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Milestone name</span>
+            <input formControlName="name" type="text" placeholder="Plastering completion" />
+          </label>
+
+          <label>
+            <span>Sequence</span>
+            <input formControlName="sequence_no" type="number" min="1" />
+          </label>
+
+          <label>
+            <span>Agreed amount</span>
+            <input formControlName="agreed_amount" type="number" min="0" step="1000" />
+          </label>
+
+          <label>
+            <span>Completion %</span>
+            <input formControlName="completion_percentage" type="number" min="0" max="100" step="5" />
+          </label>
+
+          <label>
+            <span>Planned start</span>
+            <input formControlName="planned_start_date" type="date" />
+          </label>
+
+          <label>
+            <span>Due date</span>
+            <input formControlName="due_date" type="date" />
+          </label>
+
+          <label>
+            <span>Status</span>
+            <select formControlName="status">
+              @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Actual completion date</span>
+            <input formControlName="actual_completion_date" type="date" />
+          </label>
+
+          <label class="full-width">
+            <span>Description</span>
+            <textarea formControlName="description" rows="3" placeholder="Milestone description"></textarea>
+          </label>
+
+          <label class="full-width">
+            <span>Completion notes</span>
+            <textarea formControlName="completion_notes" rows="3" placeholder="Notes for inspection or rejection reasons"></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" type="submit" [disabled]="loading()">
+            {{ loading() ? 'Saving...' : form.value.id ? 'Update milestone' : 'Save milestone' }}
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h3>Milestone schedule</h3>
+      </div>
+
+      @if (loading()) {
+        <div class="empty-state">Loading milestones...</div>
+      } @else if (milestones().length === 0) {
+        <div class="empty-state">No milestones created yet.</div>
+      } @else {
+        <div class="milestone-list">
+          @for (milestone of milestones(); track milestone.id) {
+            <div class="milestone-item">
+              <div class="milestone-head">
+                <div>
+                  <strong>{{ milestone.name }}</strong>
+                  <small>#{{ milestone.sequence_no }}</small>
+                </div>
+                <span class="status-pill status-{{ milestone.status }}">{{ milestone.status }}</span>
+              </div>
+
+              <div class="milestone-body">
+                <span>₹{{ milestone.agreed_amount | number:'1.0-0' }}</span>
+                <span>{{ milestone.completion_percentage }}% complete</span>
+              </div>
+
+              <div class="milestone-actions">
+                <button type="button" class="link-button" (click)="editMilestone(milestone)">Edit</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </article>
+  </div>
+</section>

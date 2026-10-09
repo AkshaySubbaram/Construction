@@ -1,0 +1,27 @@
+<div class="login-shell">
+  <div class="login-card">
+    <div class="brand-block">
+      <span class="eyebrow">Construction manager</span>
+      <h1>House build tracker</h1>
+      <p>Track agencies, milestones, payments, and daily site progress in one place.</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+      <label>
+        <span>Email</span>
+        <input formControlName="email" type="email" placeholder="you@example.com" />
+      </label>
+
+      <label>
+        <span>Password</span>
+        <input formControlName="password" type="password" placeholder="Enter your password" />
+      </label>
+
+      @if (errorMessage()) {
+        <div class="alert error">{{ errorMessage() }}</div>
+      }
+
+      <button class="primary-button" type="submit">Sign in</button>
+    </form>
+  </div>
+</div>

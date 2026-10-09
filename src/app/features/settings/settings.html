@@ -1,0 +1,70 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Operations</span>
+      <h2>Settings</h2>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Project configuration</h3>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="saveSettings()" class="settings-form">
+      <div class="field-grid">
+        <label>
+          Project name
+          <input type="text" formControlName="project_name" />
+        </label>
+
+        <label>
+          Project location
+          <input type="text" formControlName="project_location" />
+        </label>
+
+        <label>
+          Owner / PM name
+          <input type="text" formControlName="owner_name" />
+        </label>
+
+        <label>
+          Currency
+          <select formControlName="currency">
+            <option value="INR">INR</option>
+            <option value="USD">USD</option>
+          </select>
+        </label>
+
+        <label>
+          Budget limit (₹)
+          <input type="number" min="1" formControlName="total_budget" />
+        </label>
+
+        <label>
+          Due alert days
+          <input type="number" min="1" formControlName="due_alert_days" />
+        </label>
+
+        <label class="checkbox-line">
+          <input type="checkbox" formControlName="notifications_enabled" />
+          <span>Enable notifications</span>
+        </label>
+
+        <label class="checkbox-line">
+          <input type="checkbox" formControlName="required_approval" />
+          <span>Require approval for expenses</span>
+        </label>
+
+        <label class="checkbox-line full-width">
+          <input type="checkbox" formControlName="photo_upload_required" />
+          <span>Require site photo evidence for progress updates</span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-button">Save settings</button>
+      </div>
+    </form>
+  </div>
+</section>

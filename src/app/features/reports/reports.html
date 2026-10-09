@@ -1,0 +1,48 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Overview</span>
+      <h2>Reports</h2>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card accent-blue">
+      <span>Total committed</span>
+      <strong>₹{{ totalCommitted() | number:'1.0-0' }}</strong>
+    </article>
+    <article class="summary-card accent-green">
+      <span>Total paid</span>
+      <strong>₹{{ totalPaid() | number:'1.0-0' }}</strong>
+    </article>
+    <article class="summary-card accent-amber">
+      <span>Remaining balance</span>
+      <strong>₹{{ remainingBalance() | number:'1.0-0' }}</strong>
+    </article>
+    <article class="summary-card accent-purple">
+      <span>Avg. completion</span>
+      <strong>{{ averageProgress() }}%</strong>
+    </article>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>Project health</h3>
+    </div>
+
+    <div class="report-grid">
+      <div class="metric-box">
+        <span>Total project spend</span>
+        <strong>₹{{ totalSpent() | number:'1.0-0' }}</strong>
+      </div>
+      <div class="metric-box">
+        <span>Variance</span>
+        <strong>₹{{ variance() | number:'1.0-0' }}</strong>
+      </div>
+      <div class="metric-box">
+        <span>Payment coverage</span>
+        <strong>{{ paymentCoverage() | number:'1.0-0' }}%</strong>
+      </div>
+    </div>
+  </div>
+</section>

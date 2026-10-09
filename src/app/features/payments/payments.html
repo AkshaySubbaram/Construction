@@ -1,0 +1,146 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Financial control</span>
+      <h2>Payments</h2>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card accent-blue">
+      <span>Total committed</span>
+      <strong>₹{{ totalCommitted() | number:'1.0-0' }}</strong>
+    </article>
+    <article class="summary-card accent-green">
+      <span>Paid</span>
+      <strong>₹{{ paidTotal() | number:'1.0-0' }}</strong>
+    </article>
+    <article class="summary-card accent-amber">
+      <span>Pending</span>
+      <strong>₹{{ pendingTotal() | number:'1.0-0' }}</strong>
+    </article>
+  </div>
+
+  <div class="layout-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <h3>{{ editingId() ? 'Edit payment' : 'Add payment' }}</h3>
+      </div>
+
+      <form [formGroup]="paymentForm" (ngSubmit)="submitPayment()" class="payment-form">
+        <div class="field-grid">
+          <label>
+            Agency
+            <select formControlName="agency_id">
+              <option value="">Select agency</option>
+              <option *ngFor="let agency of agencies()" [value]="agency.id">{{ agency.name }}</option>
+            </select>
+          </label>
+
+          <label>
+            Contract
+            <select formControlName="contract_id">
+              <option value="">No contract</option>
+              <option *ngFor="let contract of contracts()" [value]="contract.id">{{ contract.title }}</option>
+            </select>
+          </label>
+
+          <label>
+            Milestone
+            <select formControlName="milestone_id">
+              <option value="">No milestone</option>
+              <option *ngFor="let milestone of milestones()" [value]="milestone.id">{{ milestone.name }}</option>
+            </select>
+          </label>
+
+          <label>
+            Payment reference
+            <input type="text" formControlName="payment_reference" placeholder="INV-2024-046" />
+          </label>
+
+          <label>
+            Amount (₹)
+            <input type="number" min="1" formControlName="amount" />
+          </label>
+
+          <label>
+            Payment date
+            <input type="date" formControlName="payment_date" />
+          </label>
+
+          <label>
+            Payment method
+            <select formControlName="payment_method">
+              <option value="bank_transfer">Bank transfer</option>
+              <option value="upi">UPI</option>
+              <option value="cash">Cash</option>
+              <option value="cheque">Cheque</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+
+          <label>
+            Status
+            <select formControlName="status">
+              <option value="planned">Planned</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </label>
+
+          <label class="full-width">
+            Transaction reference
+            <input type="text" formControlName="transaction_reference" placeholder="NEFT/UPI/cheque number" />
+          </label>
+
+          <label class="full-width">
+            Notes
+            <textarea rows="3" formControlName="notes" placeholder="Narrative for this payment or invoice"></textarea>
+          </label>
+        </div>
+
+        <div *ngIf="formError()" class="alert error">{{ formError() }}</div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">{{ editingId() ? 'Save changes' : 'Add payment' }}</button>
+          <button type="button" class="link-button" (click)="resetForm()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Payment ledger</h3>
+      </div>
+
+      <div class="payment-list">
+        <div *ngIf="!payments().length" class="empty-state">No payments recorded yet.</div>
+
+        <article *ngFor="let payment of payments()" class="payment-item">
+          <div class="payment-head">
+            <div>
+              <strong>{{ payment.payment_reference }}</strong>
+              <small>{{ payment.payment_date }}</small>
+            </div>
+            <span class="status-pill status-{{ payment.status }}">{{ payment.status }}</span>
+          </div>
+
+          <div class="payment-body">
+            <span>₹{{ payment.amount | number:'1.0-0' }}</span>
+            <span>{{ payment.payment_method }}</span>
+          </div>
+
+          <div class="payment-meta" *ngIf="payment.transaction_reference">
+            Ref: {{ payment.transaction_reference }}
+          </div>
+
+          <div class="payment-actions">
+            <button type="button" class="link-button" (click)="editPayment(payment)">Edit</button>
+            <button type="button" class="link-button danger" (click)="deletePayment(payment.id)">Delete</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

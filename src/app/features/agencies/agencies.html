@@ -1,0 +1,121 @@
+<section class="page-section">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">Operations</span>
+      <h2>Agencies</h2>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert error">{{ errorMessage() }}</div>
+  }
+
+  <div class="layout-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <h3>{{ form.value.id ? 'Edit agency' : 'Add agency' }}</h3>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="agency-form">
+        <div class="field-grid">
+          <label>
+            <span>Agency name</span>
+            <input formControlName="name" type="text" placeholder="e.g. Prime Civil Works" />
+          </label>
+
+          <label>
+            <span>Work category</span>
+            <input formControlName="work_category" type="text" placeholder="Civil construction" />
+          </label>
+
+          <label>
+            <span>Contact person</span>
+            <input formControlName="contact_person" type="text" placeholder="Name" />
+          </label>
+
+          <label>
+            <span>Phone</span>
+            <input formControlName="phone" type="tel" placeholder="+91 98765 43210" />
+          </label>
+
+          <label>
+            <span>Email</span>
+            <input formControlName="email" type="email" placeholder="name@example.com" />
+          </label>
+
+          <label>
+            <span>Status</span>
+            <select formControlName="status">
+              @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Start date</span>
+            <input formControlName="start_date" type="date" />
+          </label>
+
+          <label>
+            <span>Expected completion</span>
+            <input formControlName="expected_completion_date" type="date" />
+          </label>
+
+          <label class="full-width">
+            <span>Address</span>
+            <input formControlName="address" type="text" placeholder="Site or office address" />
+          </label>
+
+          <label class="full-width">
+            <span>Notes</span>
+            <textarea formControlName="notes" rows="4" placeholder="Important contact notes, scope reminders, or issues."></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" type="submit" [disabled]="loading()">
+            {{ loading() ? 'Saving...' : form.value.id ? 'Update agency' : 'Save agency' }}
+          </button>
+          @if (form.value.id) {
+            <button class="secondary-button" type="button" (click)="form.reset({ id: '', name: '', work_category: 'Civil construction', contact_person: '', phone: '', email: '', address: '', notes: '', status: 'active', start_date: '', expected_completion_date: '' })">
+              Cancel edit
+            </button>
+          }
+        </div>
+      </form>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <h3>Agency list</h3>
+      </div>
+
+      @if (loading()) {
+        <div class="empty-state">Loading agencies...</div>
+      } @else if (agencies().length === 0) {
+        <div class="empty-state">No agencies added yet.</div>
+      } @else {
+        <div class="agency-list">
+          @for (agency of agencies(); track agency.id) {
+            <div class="agency-item">
+              <div class="agency-summary">
+                <strong>{{ agency.name }}</strong>
+                <span>{{ agency.work_category }}</span>
+                <small>{{ agency.contact_person }} · {{ agency.phone }}</small>
+              </div>
+
+              <div class="agency-meta">
+                <span class="status-pill status-{{ agency.status }}">{{ agency.status }}</span>
+                <div class="action-row">
+                  <button type="button" class="link-button" (click)="editAgency(agency)">Edit</button>
+                  <button type="button" class="link-button danger" (click)="deactivateAgency(agency.id)">Deactivate</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </article>
+  </div>
+</section>
