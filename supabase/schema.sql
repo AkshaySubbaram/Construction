@@ -101,6 +101,7 @@ create table if not exists public.expenses (
 
 create table if not exists public.documents (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
   agency_id uuid references public.agencies(id) on delete set null,
   title text not null,
   document_type text not null default 'photo',
@@ -223,14 +224,14 @@ create policy "Authenticated users can update expenses" on public.expenses
 create policy "Authenticated users can delete expenses" on public.expenses
   for delete to authenticated using (true);
 
-create policy "Authenticated users can view all documents" on public.documents
-  for select to authenticated using (true);
-create policy "Authenticated users can insert documents" on public.documents
-  for insert to authenticated with check (true);
-create policy "Authenticated users can update documents" on public.documents
-  for update to authenticated using (true) with check (true);
-create policy "Authenticated users can delete documents" on public.documents
-  for delete to authenticated using (true);
+create policy "Authenticated users can view their own documents" on public.documents
+  for select to authenticated using (auth.uid() = user_id);
+create policy "Authenticated users can insert their own documents" on public.documents
+  for insert to authenticated with check (auth.uid() = user_id);
+create policy "Authenticated users can update their own documents" on public.documents
+  for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Authenticated users can delete their own documents" on public.documents
+  for delete to authenticated using (auth.uid() = user_id);
 
 create policy "Authenticated users can view settings" on public.project_settings
   for select to authenticated using (true);

@@ -12,18 +12,29 @@
     </div>
 
     <div class="upload-box">
+      <div class="form-row">
+        <label class="category-field">
+          <span>Agency category</span>
+          <select [value]="selectedAgencyId()" (change)="onAgencySelectionChange($any($event.target).value)">
+            <option value="">All documents</option>
+            <option value="other-category">Other category</option>
+            <option *ngFor="let agency of agencies()" [value]="agency.id">{{ agency.name }} — {{ agency.work_category }}</option>
+          </select>
+        </label>
+      </div>
+
       <label class="upload-input">
         <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,image/*" multiple (change)="onFilesSelected($event)" />
         <span>Choose files</span>
       </label>
-      <small>Choose files, then submit to save them. Sample files are no longer preloaded.</small>
+      <small>Choose the agency category, select the files, then submit to save them under that group.</small>
 
       <div class="selected-files" *ngIf="selectedFiles().length > 0">
         <p>Ready to upload:</p>
         <ul>
           <li *ngFor="let file of selectedFiles()">{{ file.name }}</li>
         </ul>
-        <button type="button" class="primary-button" (click)="submitSelectedFiles()" [disabled]="isSaving()">
+        <button type="button" class="primary-button" (click)="submitSelectedFiles()" [disabled]="isSaving() || !selectedAgencyId()">
           {{ isSaving() ? 'Saving…' : 'Submit files' }}
         </button>
       </div>
@@ -46,6 +57,7 @@
 
         <div class="doc-actions">
           <button type="button" class="link-button" (click)="viewDocument(item)">View</button>
+          <button type="button" class="link-button" (click)="downloadDocument(item)">Download</button>
           @if (item.allowRemove) {
             <button type="button" class="link-button danger" (click)="removeDocument(item.id)">Remove</button>
           }
