@@ -208,7 +208,18 @@ export class ContractService {
   }
 
   private isMissingTableOrRlsError(error: unknown): boolean {
-    const text = error instanceof Error ? error.message : String(error ?? '');
-    return /relation .* does not exist|does not exist|42P01|42501|PGRST301|RLS/i.test(text);
+    const message =
+      typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
+            ? error.message
+            : JSON.stringify(error ?? '');
+
+    const code =
+      typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string' ? String(error.code) : '';
+
+    return /relation .* does not exist|does not exist|could not find the table|schema cache|42P01|42P001|42501|PGRST205|PGRST301|RLS/i.test(`${message} ${code}`);
   }
 }

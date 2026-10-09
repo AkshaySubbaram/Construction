@@ -35,6 +35,35 @@
   margin: 0 0 1rem;
 }
 
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.upload-input {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 0.8rem 1rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.upload-input input {
+  display: none;
+}
+
+.upload-box small {
+  color: #64748b;
+}
+
 .document-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

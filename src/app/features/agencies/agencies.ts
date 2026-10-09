@@ -123,4 +123,13 @@ export class AgenciesComponent implements OnInit {
       this.errorMessage.set(error instanceof Error ? error.message : 'Unable to deactivate agency.');
     }
   }
+
+  async deleteAgency(id: string): Promise<void> {
+    try {
+      await this.agencyService.deleteAgency(id);
+      await this.loadAgencies();
+    } catch (error) {
+      this.errorMessage.set(error instanceof Error ? error.message : 'Unable to delete agency.');
+    }
+  }
 }

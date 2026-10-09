@@ -8,16 +8,53 @@
 
   <div class="panel">
     <div class="panel-header">
+      <h3>Upload document or photo</h3>
+    </div>
+
+    <div class="upload-box">
+      <label class="upload-input">
+        <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,image/*" multiple (change)="onFilesSelected($event)" />
+        <span>Choose files</span>
+      </label>
+      <small>Choose files, then submit to save them. Sample files are no longer preloaded.</small>
+
+      <div class="selected-files" *ngIf="selectedFiles().length > 0">
+        <p>Ready to upload:</p>
+        <ul>
+          <li *ngFor="let file of selectedFiles()">{{ file.name }}</li>
+        </ul>
+        <button type="button" class="primary-button" (click)="submitSelectedFiles()" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving…' : 'Submit files' }}
+        </button>
+      </div>
+
+      <p class="form-error" *ngIf="errorMessage() as message">{{ message }}</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
       <h3>Uploaded record set</h3>
     </div>
 
-    <div class="document-grid">
+    <div class="document-grid" *ngIf="documents().length > 0; else emptyDocuments">
       <article *ngFor="let item of documents()" class="document-card">
         <div class="doc-type">{{ item.type }}</div>
         <strong>{{ item.name }}</strong>
         <small>{{ item.date }}</small>
         <span>{{ item.related }}</span>
+
+        <div class="doc-actions">
+          <button type="button" class="link-button" (click)="viewDocument(item)">View</button>
+          @if (item.allowRemove) {
+            <button type="button" class="link-button danger" (click)="removeDocument(item.id)">Remove</button>
+          }
+        </div>
       </article>
     </div>
+
+    <ng-template #emptyDocuments>
+      <div class="empty-state">No uploaded evidence yet. Add a file and submit it to save it to Supabase.</div>
+    </ng-template>
   </div>
 </section>

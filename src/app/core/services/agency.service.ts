@@ -165,6 +165,34 @@ export class AgencyService {
     return this.updateAgency(id, { status: 'inactive' });
   }
 
+  async deleteAgency(id: string): Promise<void> {
+    const client = this.supabaseService.client;
+
+    if (client && this.authService.isAuthenticated()) {
+      try {
+        const { error } = await client.from('agencies').delete().eq('id', id);
+
+        if (error) {
+          if (this.isMissingTableOrRlsError(error)) {
+            this.removeDemoAgency(id);
+            return;
+          }
+          throw error;
+        }
+
+        return;
+      } catch (error) {
+        if (this.isMissingTableOrRlsError(error)) {
+          this.removeDemoAgency(id);
+          return;
+        }
+        throw error;
+      }
+    }
+
+    this.removeDemoAgency(id);
+  }
+
   private mapFromDb(row: Record<string, unknown>): Agency {
     return {
       id: String(row['id'] ?? crypto.randomUUID()),
@@ -201,9 +229,30 @@ export class AgencyService {
     return updated;
   }
 
+  private removeDemoAgency(id: string): void {
+    const index = this.demoAgencies.findIndex((agency) => agency.id === id);
+
+    if (index === -1) {
+      throw new Error('Agency not found');
+    }
+
+    this.demoAgencies.splice(index, 1);
+  }
+
   private isMissingTableOrRlsError(error: unknown): boolean {
-    const text = error instanceof Error ? error.message : String(error ?? '');
-    return /relation .* does not exist|does not exist|42P01|42501|PGRST301|RLS/i.test(text);
+    const message =
+      typeof error === 'string'
+        ? error
+        : error instanceof Error
+          ? error.message
+          : typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
+            ? error.message
+            : JSON.stringify(error ?? '');
+
+    const code =
+      typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string' ? String(error.code) : '';
+
+    return /relation .* does not exist|does not exist|could not find the table|schema cache|42P01|42P001|42501|PGRST205|PGRST301|RLS/i.test(`${message} ${code}`);
   }
 
   getDemoMode(): boolean {
