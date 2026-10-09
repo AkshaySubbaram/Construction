@@ -63,13 +63,23 @@ export class AgencyService {
     const client = this.supabaseService.client;
 
     if (client && this.authService.isAuthenticated()) {
-      const { data, error } = await client.from('agencies').select('*').order('created_at', { ascending: false });
+      try {
+        const { data, error } = await client.from('agencies').select('*').order('created_at', { ascending: false });
 
-      if (error) {
+        if (error) {
+          if (this.isMissingTableOrRlsError(error)) {
+            return [...this.demoAgencies];
+          }
+          throw error;
+        }
+
+        return (data ?? []).map((row) => this.mapFromDb(row));
+      } catch (error) {
+        if (this.isMissingTableOrRlsError(error)) {
+          return [...this.demoAgencies];
+        }
         throw error;
       }
-
-      return (data ?? []).map((row) => this.mapFromDb(row));
     }
 
     return [...this.demoAgencies];
@@ -87,13 +97,25 @@ export class AgencyService {
     const client = this.supabaseService.client;
 
     if (client && this.authService.isAuthenticated()) {
-      const { data, error } = await client.from('agencies').insert({ ...agency, project_id: 'project-1' }).select().single();
+      try {
+        const { data, error } = await client.from('agencies').insert({ ...agency, project_id: 'project-1' }).select().single();
 
-      if (error) {
+        if (error) {
+          if (this.isMissingTableOrRlsError(error)) {
+            this.demoAgencies.unshift(agency);
+            return agency;
+          }
+          throw error;
+        }
+
+        return this.mapFromDb(data);
+      } catch (error) {
+        if (this.isMissingTableOrRlsError(error)) {
+          this.demoAgencies.unshift(agency);
+          return agency;
+        }
         throw error;
       }
-
-      return this.mapFromDb(data);
     }
 
     this.demoAgencies.unshift(agency);
@@ -104,13 +126,23 @@ export class AgencyService {
     const client = this.supabaseService.client;
 
     if (client && this.authService.isAuthenticated()) {
-      const { data, error } = await client.from('agencies').update({ ...changes, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+      try {
+        const { data, error } = await client.from('agencies').update({ ...changes, updated_at: new Date().toISOString() }).eq('id', id).select().single();
 
-      if (error) {
+        if (error) {
+          if (this.isMissingTableOrRlsError(error)) {
+            return this.updateDemoAgency(id, changes);
+          }
+          throw error;
+        }
+
+        return this.mapFromDb(data);
+      } catch (error) {
+        if (this.isMissingTableOrRlsError(error)) {
+          return this.updateDemoAgency(id, changes);
+        }
         throw error;
       }
-
-      return this.mapFromDb(data);
     }
 
     const index = this.demoAgencies.findIndex((agency) => agency.id === id);
@@ -150,6 +182,28 @@ export class AgencyService {
       created_at: (row['created_at'] as string | undefined) ?? new Date().toISOString(),
       updated_at: (row['updated_at'] as string | undefined) ?? new Date().toISOString(),
     };
+  }
+
+  private updateDemoAgency(id: string, changes: Partial<AgencyDraft>): Agency {
+    const index = this.demoAgencies.findIndex((agency) => agency.id === id);
+
+    if (index === -1) {
+      throw new Error('Agency not found');
+    }
+
+    const updated = {
+      ...this.demoAgencies[index],
+      ...changes,
+      updated_at: new Date().toISOString(),
+    };
+
+    this.demoAgencies[index] = updated;
+    return updated;
+  }
+
+  private isMissingTableOrRlsError(error: unknown): boolean {
+    const text = error instanceof Error ? error.message : String(error ?? '');
+    return /relation .* does not exist|does not exist|42P01|42501|PGRST301|RLS/i.test(text);
   }
 
   getDemoMode(): boolean {
