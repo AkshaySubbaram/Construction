@@ -24,7 +24,6 @@ export class App {
     { label: 'Expenses', path: '/expenses' },
     { label: 'Documents', path: '/documents' },
     { label: 'Reports', path: '/reports' },
-    { label: 'Settings', path: '/settings' },
   ];
 
   readonly userName = computed(() => this.authService.session()?.displayName ?? 'Project owner');
@@ -62,8 +61,6 @@ export class App {
         return 'Documents';
       case '/reports':
         return 'Reports';
-      case '/settings':
-        return 'Settings';
       default:
         return 'Overview';
     }

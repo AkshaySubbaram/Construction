@@ -11,7 +11,6 @@ import { MilestonesComponent } from './features/milestones/milestones';
 import { PaymentsComponent } from './features/payments/payments';
 import { ProgressComponent } from './features/progress/progress';
 import { ReportsComponent } from './features/reports/reports';
-import { SettingsComponent } from './features/settings/settings';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -25,6 +24,5 @@ export const routes: Routes = [
   { path: 'expenses', component: ExpensesComponent, canActivate: [authGuard] },
   { path: 'documents', component: DocumentsComponent, canActivate: [authGuard] },
   { path: 'reports', component: ReportsComponent, canActivate: [authGuard] },
-  { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '/dashboard' },
 ];

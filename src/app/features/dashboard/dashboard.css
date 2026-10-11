@@ -47,19 +47,26 @@
   padding: 1.2rem 1.1rem;
   box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
   border: 1px solid rgba(148, 163, 184, 0.14);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .stat-card span {
   display: block;
   color: #6b7280;
   font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .stat-card strong {
   display: block;
   margin-top: 0.7rem;
-  font-size: 2rem;
+  font-size: clamp(1.1rem, 2vw, 2rem);
+  line-height: 1.2;
   color: #0f172a;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  letter-spacing: -0.02em;
 }
 
 .stat-card.primary { border-top: 4px solid #3b82f6; }
