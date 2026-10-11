@@ -14,6 +14,7 @@ create table if not exists public.agencies (
   address text,
   notes text,
   status text not null default 'planned' check (status in ('planned', 'active', 'completed', 'inactive')),
+  agreed_amount numeric(12,2) not null default 0,
   start_date date,
   expected_completion_date date,
   created_at timestamptz not null default now(),
