@@ -62,13 +62,7 @@ export class AuthService {
     const client = this.supabaseService.client;
 
     if (!client) {
-      this.session.set({
-        id: 'demo-user',
-        email,
-        displayName: email.split('@')[0] || 'Demo User',
-        isDemo: true,
-      });
-      return;
+      throw new Error('Supabase is not configured. Please add your project URL and anon key in the environment settings.');
     }
 
     const { data, error } = await client.auth.signInWithPassword({

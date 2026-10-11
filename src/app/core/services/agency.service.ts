@@ -9,51 +9,6 @@ import { SupabaseService } from './supabase.service';
   providedIn: 'root',
 })
 export class AgencyService {
-  private readonly demoAgencies: Agency[] = [
-    {
-      id: 'agency-1',
-      project_id: 'project-1',
-      name: 'Prime Civil Works',
-      work_category: 'Civil construction',
-      contact_person: 'Ramesh Kumar',
-      phone: '+91 98765 43210',
-      email: 'ramesh@primecivil.in',
-      address: 'Banjara Hills, Hyderabad',
-      notes: 'Main RCC and structural work package.',
-      status: 'active',
-      start_date: '2026-02-10',
-      expected_completion_date: '2026-08-15',
-    },
-    {
-      id: 'agency-2',
-      project_id: 'project-1',
-      name: 'Sunrise Electricals',
-      work_category: 'Electrical work',
-      contact_person: 'Naveen Reddy',
-      phone: '+91 99887 11223',
-      email: 'naveen@sunriseelectricals.in',
-      address: 'Madhapur, Hyderabad',
-      notes: 'Wiring and fitting works in progress.',
-      status: 'active',
-      start_date: '2026-03-06',
-      expected_completion_date: '2026-09-01',
-    },
-    {
-      id: 'agency-3',
-      project_id: 'project-1',
-      name: 'BlueStone Plumbing',
-      work_category: 'Plumbing',
-      contact_person: 'Suresh Naik',
-      phone: '+91 97222 77881',
-      email: 'suresh@bluestoneplumbing.in',
-      address: 'Kukatpally, Hyderabad',
-      notes: 'Water supply and drainage installed.',
-      status: 'planned',
-      start_date: '2026-04-01',
-      expected_completion_date: '2026-07-20',
-    },
-  ];
-
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly authService: AuthService,
@@ -62,27 +17,27 @@ export class AgencyService {
   async getAgencies(): Promise<Agency[]> {
     const client = this.supabaseService.client;
 
-    if (client && this.authService.isAuthenticated()) {
-      try {
-        const { data, error } = await client.from('agencies').select('*').order('created_at', { ascending: false });
+    if (!client || !this.authService.isAuthenticated()) {
+      return [];
+    }
 
-        if (error) {
-          if (this.isMissingTableOrRlsError(error)) {
-            return [...this.demoAgencies];
-          }
-          throw error;
-        }
+    try {
+      const { data, error } = await client.from('agencies').select('*').order('created_at', { ascending: false });
 
-        return (data ?? []).map((row) => this.mapFromDb(row));
-      } catch (error) {
+      if (error) {
         if (this.isMissingTableOrRlsError(error)) {
-          return [...this.demoAgencies];
+          return [];
         }
         throw error;
       }
-    }
 
-    return [...this.demoAgencies];
+      return (data ?? []).map((row) => this.mapFromDb(row));
+    } catch (error) {
+      if (this.isMissingTableOrRlsError(error)) {
+        return [];
+      }
+      throw error;
+    }
   }
 
   async createAgency(input: AgencyDraft): Promise<Agency> {
@@ -90,75 +45,60 @@ export class AgencyService {
       ...input,
       id: input.id ?? crypto.randomUUID(),
       status: input.status ?? 'planned',
+      agreed_amount: Number(input.agreed_amount ?? 0),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
     const client = this.supabaseService.client;
 
-    if (client && this.authService.isAuthenticated()) {
-      try {
-        const { data, error } = await client.from('agencies').insert({ ...agency, project_id: 'project-1' }).select().single();
+    if (!client || !this.authService.isAuthenticated()) {
+      throw new Error('You must sign in before saving agencies.');
+    }
 
-        if (error) {
-          if (this.isMissingTableOrRlsError(error)) {
-            this.demoAgencies.unshift(agency);
-            return agency;
-          }
-          throw error;
-        }
+    try {
+      const { data, error } = await client.from('agencies').insert({ ...agency, project_id: 'project-1' }).select().single();
 
-        return this.mapFromDb(data);
-      } catch (error) {
+      if (error) {
         if (this.isMissingTableOrRlsError(error)) {
-          this.demoAgencies.unshift(agency);
-          return agency;
+          throw new Error('The agencies table or RLS policy is not ready in Supabase.');
         }
         throw error;
       }
-    }
 
-    this.demoAgencies.unshift(agency);
-    return agency;
+      return this.mapFromDb(data);
+    } catch (error) {
+      if (this.isMissingTableOrRlsError(error)) {
+        throw new Error('The agencies table or RLS policy is not ready in Supabase.');
+      }
+      throw error;
+    }
   }
 
   async updateAgency(id: string, changes: Partial<AgencyDraft>): Promise<Agency> {
     const client = this.supabaseService.client;
 
-    if (client && this.authService.isAuthenticated()) {
-      try {
-        const { data, error } = await client.from('agencies').update({ ...changes, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+    if (!client || !this.authService.isAuthenticated()) {
+      throw new Error('You must sign in before updating agencies.');
+    }
 
-        if (error) {
-          if (this.isMissingTableOrRlsError(error)) {
-            return this.updateDemoAgency(id, changes);
-          }
-          throw error;
-        }
+    try {
+      const { data, error } = await client.from('agencies').update({ ...changes, updated_at: new Date().toISOString() }).eq('id', id).select().single();
 
-        return this.mapFromDb(data);
-      } catch (error) {
+      if (error) {
         if (this.isMissingTableOrRlsError(error)) {
-          return this.updateDemoAgency(id, changes);
+          throw new Error('The agencies table or RLS policy is not ready in Supabase.');
         }
         throw error;
       }
+
+      return this.mapFromDb(data);
+    } catch (error) {
+      if (this.isMissingTableOrRlsError(error)) {
+        throw new Error('The agencies table or RLS policy is not ready in Supabase.');
+      }
+      throw error;
     }
-
-    const index = this.demoAgencies.findIndex((agency) => agency.id === id);
-
-    if (index === -1) {
-      throw new Error('Agency not found');
-    }
-
-    const updated = {
-      ...this.demoAgencies[index],
-      ...changes,
-      updated_at: new Date().toISOString(),
-    };
-
-    this.demoAgencies[index] = updated;
-    return updated;
   }
 
   async deactivateAgency(id: string): Promise<Agency> {
@@ -168,29 +108,27 @@ export class AgencyService {
   async deleteAgency(id: string): Promise<void> {
     const client = this.supabaseService.client;
 
-    if (client && this.authService.isAuthenticated()) {
-      try {
-        const { error } = await client.from('agencies').delete().eq('id', id);
+    if (!client || !this.authService.isAuthenticated()) {
+      throw new Error('You must sign in before deleting agencies.');
+    }
 
-        if (error) {
-          if (this.isMissingTableOrRlsError(error)) {
-            this.removeDemoAgency(id);
-            return;
-          }
-          throw error;
-        }
+    try {
+      const { error } = await client.from('agencies').delete().eq('id', id);
 
-        return;
-      } catch (error) {
+      if (error) {
         if (this.isMissingTableOrRlsError(error)) {
-          this.removeDemoAgency(id);
-          return;
+          throw new Error('The agencies table or RLS policy is not ready in Supabase.');
         }
         throw error;
       }
-    }
 
-    this.removeDemoAgency(id);
+      return;
+    } catch (error) {
+      if (this.isMissingTableOrRlsError(error)) {
+        throw new Error('The agencies table or RLS policy is not ready in Supabase.');
+      }
+      throw error;
+    }
   }
 
   private mapFromDb(row: Record<string, unknown>): Agency {
@@ -205,38 +143,12 @@ export class AgencyService {
       address: (row['address'] as string | null) ?? null,
       notes: (row['notes'] as string | null) ?? null,
       status: (row['status'] as Agency['status']) ?? 'planned',
+      agreed_amount: Number(row['agreed_amount'] ?? 0),
       start_date: (row['start_date'] as string | null) ?? null,
       expected_completion_date: (row['expected_completion_date'] as string | null) ?? null,
       created_at: (row['created_at'] as string | undefined) ?? new Date().toISOString(),
       updated_at: (row['updated_at'] as string | undefined) ?? new Date().toISOString(),
     };
-  }
-
-  private updateDemoAgency(id: string, changes: Partial<AgencyDraft>): Agency {
-    const index = this.demoAgencies.findIndex((agency) => agency.id === id);
-
-    if (index === -1) {
-      throw new Error('Agency not found');
-    }
-
-    const updated = {
-      ...this.demoAgencies[index],
-      ...changes,
-      updated_at: new Date().toISOString(),
-    };
-
-    this.demoAgencies[index] = updated;
-    return updated;
-  }
-
-  private removeDemoAgency(id: string): void {
-    const index = this.demoAgencies.findIndex((agency) => agency.id === id);
-
-    if (index === -1) {
-      throw new Error('Agency not found');
-    }
-
-    this.demoAgencies.splice(index, 1);
   }
 
   private isMissingTableOrRlsError(error: unknown): boolean {
@@ -256,6 +168,6 @@ export class AgencyService {
   }
 
   getDemoMode(): boolean {
-    return !environment.supabaseUrl || !environment.supabaseAnonKey || !this.supabaseService.isConfigured;
+    return !!environment.demoMode;
   }
 }

@@ -9,41 +9,6 @@ import { SupabaseService } from './supabase.service';
   providedIn: 'root',
 })
 export class ContractService {
-  private readonly demoContracts: Contract[] = [
-    {
-      id: 'contract-1',
-      agency_id: 'agency-1',
-      agency_name: 'Prime Civil Works',
-      contract_number: 'CC-2026-001',
-      title: 'Structural civil work',
-      description: 'Foundation, RCC, and wall construction for ground floor.',
-      amount: 1850000,
-      advance_amount: 200000,
-      retention_amount: 50000,
-      agreed_start_date: '2026-02-15',
-      expected_completion_date: '2026-08-15',
-      scope_of_work: 'Excavation, foundation, RCC, walls, and structural work.',
-      terms_and_conditions: 'Milestone-based billing and retained amount after final completion.',
-      status: 'active',
-    },
-    {
-      id: 'contract-2',
-      agency_id: 'agency-2',
-      agency_name: 'Sunrise Electricals',
-      contract_number: 'EL-2026-014',
-      title: 'Internal electrical installation',
-      description: 'Wiring, fixtures, and panel installation.',
-      amount: 420000,
-      advance_amount: 60000,
-      retention_amount: 15000,
-      agreed_start_date: '2026-03-10',
-      expected_completion_date: '2026-09-05',
-      scope_of_work: 'Concealed wiring, DB installation, light fixtures and fans.',
-      terms_and_conditions: 'Stage completion and final testing required.',
-      status: 'active',
-    },
-  ];
-
   constructor(
     private readonly agencyService: AgencyService,
     private readonly supabaseService: SupabaseService,
@@ -55,36 +20,27 @@ export class ContractService {
     const agencies = await this.agencyService.getAgencies();
     const agencyMap = new Map(agencies.map((agency) => [agency.id, agency.name]));
 
-    if (client && this.authService.isAuthenticated()) {
-      try {
-        const { data, error } = await client.from('contracts').select('*').order('created_at', { ascending: false });
+    if (!client || !this.authService.isAuthenticated()) {
+      return [];
+    }
 
-        if (error) {
-          if (this.isMissingTableOrRlsError(error)) {
-            return this.demoContracts.map((contract) => ({
-              ...contract,
-              agency_name: agencyMap.get(contract.agency_id) ?? contract.agency_name ?? 'Unknown agency',
-            }));
-          }
-          throw error;
-        }
+    try {
+      const { data, error } = await client.from('contracts').select('*').order('created_at', { ascending: false });
 
-        return (data ?? []).map((row) => this.mapFromDb(row, agencyMap));
-      } catch (error) {
+      if (error) {
         if (this.isMissingTableOrRlsError(error)) {
-          return this.demoContracts.map((contract) => ({
-            ...contract,
-            agency_name: agencyMap.get(contract.agency_id) ?? contract.agency_name ?? 'Unknown agency',
-          }));
+          return [];
         }
         throw error;
       }
-    }
 
-    return this.demoContracts.map((contract) => ({
-      ...contract,
-      agency_name: agencyMap.get(contract.agency_id) ?? contract.agency_name ?? 'Unknown agency',
-    }));
+      return (data ?? []).map((row) => this.mapFromDb(row, agencyMap));
+    } catch (error) {
+      if (this.isMissingTableOrRlsError(error)) {
+        return [];
+      }
+      throw error;
+    }
   }
 
   async createContract(input: ContractDraft): Promise<Contract> {
@@ -103,65 +59,55 @@ export class ContractService {
     const agencies = await this.agencyService.getAgencies();
     const agencyMap = new Map(agencies.map((agency) => [agency.id, agency.name]));
 
-    if (client && this.authService.isAuthenticated()) {
-      try {
-        const { data, error } = await client.from('contracts').insert({ ...contract, agency_name: agencyMap.get(contract.agency_id) ?? null }).select().single();
+    if (!client || !this.authService.isAuthenticated()) {
+      throw new Error('You must sign in before saving contracts.');
+    }
 
-        if (error) {
-          if (this.isMissingTableOrRlsError(error)) {
-            const completeContract = { ...contract, agency_name: agencyMap.get(contract.agency_id) ?? 'Unknown agency' };
-            this.demoContracts.unshift(completeContract);
-            return completeContract;
-          }
-          throw error;
-        }
+    try {
+      const { data, error } = await client.from('contracts').insert({ ...contract, agency_name: agencyMap.get(contract.agency_id) ?? null }).select().single();
 
-        return this.mapFromDb(data, agencyMap);
-      } catch (error) {
+      if (error) {
         if (this.isMissingTableOrRlsError(error)) {
-          const completeContract = { ...contract, agency_name: agencyMap.get(contract.agency_id) ?? 'Unknown agency' };
-          this.demoContracts.unshift(completeContract);
-          return completeContract;
+          throw new Error('The contracts table or RLS policy is not ready in Supabase.');
         }
         throw error;
       }
+
+      return this.mapFromDb(data, agencyMap);
+    } catch (error) {
+      if (this.isMissingTableOrRlsError(error)) {
+        throw new Error('The contracts table or RLS policy is not ready in Supabase.');
+      }
+      throw error;
     }
-
-    const completeContract = {
-      ...contract,
-      agency_name: agencyMap.get(contract.agency_id) ?? 'Unknown agency',
-    };
-
-    this.demoContracts.unshift(completeContract);
-    return completeContract;
   }
 
   async updateContract(id: string, changes: Partial<ContractDraft>): Promise<Contract> {
     const client = this.supabaseService.client;
 
-    if (client && this.authService.isAuthenticated()) {
-      try {
-        const { data, error } = await client.from('contracts').update({ ...changes, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+    if (!client || !this.authService.isAuthenticated()) {
+      throw new Error('You must sign in before updating contracts.');
+    }
 
-        if (error) {
-          if (this.isMissingTableOrRlsError(error)) {
-            return this.updateDemoContract(id, changes);
-          }
-          throw error;
-        }
+    try {
+      const { data, error } = await client.from('contracts').update({ ...changes, updated_at: new Date().toISOString() }).eq('id', id).select().single();
 
-        const agencies = await this.agencyService.getAgencies();
-        const agencyMap = new Map(agencies.map((agency) => [agency.id, agency.name]));
-        return this.mapFromDb(data, agencyMap);
-      } catch (error) {
+      if (error) {
         if (this.isMissingTableOrRlsError(error)) {
-          return this.updateDemoContract(id, changes);
+          throw new Error('The contracts table or RLS policy is not ready in Supabase.');
         }
         throw error;
       }
-    }
 
-    return this.updateDemoContract(id, changes);
+      const agencies = await this.agencyService.getAgencies();
+      const agencyMap = new Map(agencies.map((agency) => [agency.id, agency.name]));
+      return this.mapFromDb(data, agencyMap);
+    } catch (error) {
+      if (this.isMissingTableOrRlsError(error)) {
+        throw new Error('The contracts table or RLS policy is not ready in Supabase.');
+      }
+      throw error;
+    }
   }
 
   private mapFromDb(row: Record<string, unknown>, agencyMap: Map<string, string>): Contract {
@@ -185,26 +131,6 @@ export class ContractService {
       created_at: (row['created_at'] as string | undefined) ?? new Date().toISOString(),
       updated_at: (row['updated_at'] as string | undefined) ?? new Date().toISOString(),
     };
-  }
-
-  private updateDemoContract(id: string, changes: Partial<ContractDraft>): Contract {
-    const index = this.demoContracts.findIndex((contract) => contract.id === id);
-
-    if (index === -1) {
-      throw new Error('Contract not found');
-    }
-
-    const updated = {
-      ...this.demoContracts[index],
-      ...changes,
-      amount: Number(changes.amount ?? this.demoContracts[index].amount),
-      advance_amount: Number(changes.advance_amount ?? this.demoContracts[index].advance_amount),
-      retention_amount: Number(changes.retention_amount ?? this.demoContracts[index].retention_amount),
-      updated_at: new Date().toISOString(),
-    };
-
-    this.demoContracts[index] = updated;
-    return updated;
   }
 
   private isMissingTableOrRlsError(error: unknown): boolean {

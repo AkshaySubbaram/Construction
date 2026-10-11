@@ -53,6 +53,11 @@
           </label>
 
           <label>
+            <span>Total agreed amount</span>
+            <input formControlName="agreed_amount" type="number" min="0" step="1000" placeholder="250000" />
+          </label>
+
+          <label>
             <span>Start date</span>
             <input formControlName="start_date" type="date" />
           </label>
@@ -103,6 +108,7 @@
                 <strong>{{ agency.name }}</strong>
                 <span>{{ agency.work_category }}</span>
                 <small>{{ agency.contact_person }} · {{ agency.phone }}</small>
+                <small>Total agreed: ₹{{ (agency.agreed_amount ?? 0) | number:'1.0-0' }}</small>
               </div>
 
               <div class="agency-meta">

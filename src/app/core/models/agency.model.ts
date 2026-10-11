@@ -11,6 +11,7 @@ export interface Agency {
   address?: string | null;
   notes?: string | null;
   status: AgencyStatus;
+  agreed_amount?: number;
   start_date?: string | null;
   expected_completion_date?: string | null;
   created_at?: string;

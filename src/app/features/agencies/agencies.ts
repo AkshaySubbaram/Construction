@@ -31,6 +31,7 @@ export class AgenciesComponent implements OnInit {
     address: [''],
     notes: [''],
     status: ['active' as AgencyStatus, Validators.required],
+    agreed_amount: [0, [Validators.min(0)]],
     start_date: [''],
     expected_completion_date: [''],
   });
@@ -69,6 +70,7 @@ export class AgenciesComponent implements OnInit {
       address: payload.address || null,
       notes: payload.notes || null,
       status: payload.status,
+      agreed_amount: Number(payload.agreed_amount ?? 0),
       start_date: payload.start_date || null,
       expected_completion_date: payload.expected_completion_date || null,
     };
@@ -90,6 +92,7 @@ export class AgenciesComponent implements OnInit {
         address: '',
         notes: '',
         status: 'active',
+        agreed_amount: 0,
         start_date: '',
         expected_completion_date: '',
       });
@@ -110,6 +113,7 @@ export class AgenciesComponent implements OnInit {
       address: agency.address ?? '',
       notes: agency.notes ?? '',
       status: agency.status,
+      agreed_amount: agency.agreed_amount ?? 0,
       start_date: agency.start_date ?? '',
       expected_completion_date: agency.expected_completion_date ?? '',
     });

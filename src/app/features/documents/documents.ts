@@ -152,61 +152,51 @@ export class DocumentsComponent implements OnInit {
     const relatedLabel = selectedAgencyId === this.otherCategoryValue ? 'Other category' : (selectedAgency?.name ?? 'Agency record');
 
     try {
-      if (client && authenticated && userId) {
-        for (const file of files) {
-          const fileName = file.name.replace(/\s+/g, '-');
-          const storagePath = `construction-evidence/${userId}/${Date.now()}-${fileName}`;
-          const { data: uploadedFile, error: uploadError } = await client.storage.from('documents').upload(storagePath, file, {
-            cacheControl: '3600',
-            upsert: false,
-          });
+      if (!client || !authenticated || !userId) {
+        throw new Error('The Supabase document bucket or table is not ready yet. Please create the documents bucket and enable the required policies.');
+      }
 
-          if (uploadError) {
-            throw uploadError;
-          }
+      for (const file of files) {
+        const fileName = file.name.replace(/\s+/g, '-');
+        const storagePath = `construction-evidence/${userId}/${Date.now()}-${fileName}`;
+        const { data: uploadedFile, error: uploadError } = await client.storage.from('documents').upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
-          const { data: publicUrlData } = client.storage.from('documents').getPublicUrl(uploadedFile.path);
-          const { data: documentRow, error: insertError } = await client
-            .from('documents')
-            .insert({
-              user_id: userId,
-              agency_id: agencyIdForSave,
-              title: file.name,
-              document_type: file.type.startsWith('image/') ? 'photo' : 'document',
-              file_url: publicUrlData.publicUrl,
-              notes: JSON.stringify({ uploaded_by: userId, agency_id: agencyIdForSave, agency_name: relatedLabel, uploaded_from: 'site-evidence' }),
-            })
-            .select()
-            .single();
-
-          if (insertError) {
-            throw insertError;
-          }
-
-          savedDocs.push({
-            id: crypto.randomUUID(),
-            name: file.name,
-            type: file.type.startsWith('image/') ? 'Site photo' : 'Document',
-            date: new Date().toISOString().slice(0, 10),
-            related: relatedLabel,
-            url: publicUrlData.publicUrl,
-            allowRemove: true,
-            dbId: documentRow?.id ? String(documentRow.id) : undefined,
-            storagePath,
-          });
+        if (uploadError) {
+          throw uploadError;
         }
-      } else {
-        savedDocs.push(
-          ...files.map((file) => ({
-            id: crypto.randomUUID(),
-            name: file.name,
-            type: file.type.startsWith('image/') ? 'Site photo' : 'Document',
-            date: new Date().toISOString().slice(0, 10),
-            related: relatedLabel,
-            url: URL.createObjectURL(file),
-            allowRemove: true,
-          })),
-        );
+
+        const { data: publicUrlData } = client.storage.from('documents').getPublicUrl(uploadedFile.path);
+        const { data: documentRow, error: insertError } = await client
+          .from('documents')
+          .insert({
+            user_id: userId,
+            agency_id: agencyIdForSave,
+            title: file.name,
+            document_type: file.type.startsWith('image/') ? 'photo' : 'document',
+            file_url: publicUrlData.publicUrl,
+            notes: JSON.stringify({ uploaded_by: userId, agency_id: agencyIdForSave, agency_name: relatedLabel, uploaded_from: 'site-evidence' }),
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        savedDocs.push({
+          id: crypto.randomUUID(),
+          name: file.name,
+          type: file.type.startsWith('image/') ? 'Site photo' : 'Document',
+          date: new Date().toISOString().slice(0, 10),
+          related: relatedLabel,
+          url: publicUrlData.publicUrl,
+          allowRemove: true,
+          dbId: documentRow?.id ? String(documentRow.id) : undefined,
+          storagePath,
+        });
       }
 
       this.uploadedDocuments.update((current) => [...savedDocs, ...current]);
@@ -214,19 +204,8 @@ export class DocumentsComponent implements OnInit {
       await this.loadSavedDocuments();
     } catch (error) {
       console.error('Unable to save uploaded evidence:', error);
-      const fallbackDocs = files.map((file) => ({
-        id: crypto.randomUUID(),
-        name: file.name,
-        type: file.type.startsWith('image/') ? 'Site photo' : 'Document',
-        date: new Date().toISOString().slice(0, 10),
-        related: selectedAgencyId === this.otherCategoryValue ? 'Other category' : (this.agencies().find((agency) => agency.id === selectedAgencyId)?.name ?? 'Agency record'),
-        url: URL.createObjectURL(file),
-        allowRemove: true,
-      }));
-
-      this.uploadedDocuments.update((current) => [...fallbackDocs, ...current]);
       this.selectedFiles.set([]);
-      this.errorMessage.set('The files were saved in this session because the Supabase document bucket or table is not ready yet.');
+      this.errorMessage.set('The Supabase document bucket or table is not ready yet. Please create the documents bucket and enable the required policies.');
     } finally {
       this.isSaving.set(false);
     }
